@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulateur Kap TPE</title>
+  <meta name="description" content="Vérifiez votre éligibilité à l'aide Kap TPE pour les artisans et commerçants à La Réunion : code APE, chiffre d'affaires, effectif, localisation et montant du projet.">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #001f3f, #2e3b4e);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #FFD700;
+      margin-bottom: 1rem;
+    }
+    form {
+      background: #2f2f2f;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    label {
+      display: block;
+      margin: 1rem 0 0.5rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: #FFD700;
+      color: #000;
+      padding: 0.8rem;
+      width: 100%;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #FFC300;
+    }
+    #resultat {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simulateur d’éligibilité Kap TPE</h1>
+  <form id="kapForm">
+    <label for="ape">Code APE :</label>
+    <input type="text" id="ape" required>
+
+    <label for="ca">CA annuel (€ HT) :</label>
+    <input type="number" id="ca" required>
+
+    <label for="salaries">Nombre de salariés :</label>
+    <input type="number" id="salaries" required>
+
+    <label for="montant">Montant projet (€ HT) :</label>
+    <input type="number" id="montant" required>
+
+    <label for="hauts">Votre entreprise est-elle située dans les Hauts ?</label>
+    <select id="hauts">
+      <option value="non">Non</option>
+      <option value="oui">Oui</option>
+    </select>
+
+    <button type="submit">Vérifier</button>
+  </form>
+  <div id="resultat"></div>
+
+  <script>
+    const codesEligibles = ["4332A", "5610A", "9602B", "4932Z", "4334Z"];
+
+    document.getElementById("kapForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const ape = document.getElementById("ape").value.trim().toUpperCase();
+      const ca = parseFloat(document.getElementById("ca").value);
+      const salaries = parseInt(document.getElementById("salaries").value);
+      const montant = parseFloat(document.getElementById("montant").value);
+      const hauts = document.getElementById("hauts").value;
+
+      const eligible = 
+        codesEligibles.includes(ape) &&
+        ca <= 1000000 &&
+        salaries < 10 &&
+        montant >= 5001 && montant <= 19999 &&
+        hauts === "non";
+
+      document.getElementById("resultat").innerHTML = eligible
+        ? "<p style='color: #00e676;'>✅ Vous êtes potentiellement éligible au Kap TPE.</p>"
+        : "<p style='color: red;'>❌ Vous ne remplissez pas tous les critères d’éligibilité.</p>";
+    });
+  </script>
+</body>
+</html>
