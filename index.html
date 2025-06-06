@@ -33,7 +33,7 @@
       display: block;
       margin: 1rem 0 0.5rem;
     }
-    input, select {
+    input, select, datalist {
       width: 100%;
       padding: 0.5rem;
       border-radius: 4px;
@@ -87,7 +87,8 @@
     <em>Format attendu : par exemple "7420ZA"</em></p>
 
     <label for="ape">Code APE :</label>
-    <input type="text" id="ape" placeholder="7420ZA" />
+    <input type="text" id="ape" list="ape-list" placeholder="7420ZA" />
+    <datalist id="ape-list"></datalist>
 
     <label for="ca">Chiffre d'affaires (en €) :</label>
     <input type="number" id="ca" placeholder="ex : 850000" />
@@ -119,6 +120,13 @@
           code: entry.code.toUpperCase(),
           label: entry.label
         }));
+        const dataList = document.getElementById("ape-list");
+        codesAPEEligibles.forEach(entry => {
+          const option = document.createElement("option");
+          option.value = entry.code;
+          option.textContent = `${entry.code} - ${entry.label}`;
+          dataList.appendChild(option);
+        });
       })
       .catch(err => {
         console.error("Erreur de chargement du fichier JSON :", err);
