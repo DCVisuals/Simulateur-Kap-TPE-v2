@@ -113,7 +113,7 @@
   <script>
     let codesAPEEligibles = [];
 
-    fetch("codes-ape.json")
+   fetch("https://dcvisuals.github.io/Simulateur-Kap-TPE-v2/codes-ape.json")
       .then(response => response.json())
       .then(data => {
         codesAPEEligibles = data.codes.map(entry => ({
