@@ -161,13 +161,15 @@
         const aide = Math.round(montant * taux);
         const reste = montant - aide;
 
+        const corpsMail = encodeURIComponent(`Bonjour,%0A%0AMon code ape est le ${ape}, avec un Chiffre d'Affaire de ${ca}, ${salaries} salarié(s), un montant de projet de ${montant} € et je suis basé dans les ${zone === "oui" ? "Hauts" : "Bas"} de l'île de la Réunion.%0A%0AMerci de m'indiquer les étapes à suivre.%0A%0ACordialement,`);
+
         message = `<strong>Félicitations 🎉</strong><br>
         Votre projet semble éligible à l'aide Kap TPE.<br>
         Taux de subvention : ${taux * 100}%<br>
         Montant estimé de l'aide : ${aide.toLocaleString()} €<br>
         Reste à charge estimé : ${reste.toLocaleString()} €.<br>
         <div class="contact-buttons">
-          <a href="mailto:dolcecartolina.visuals@gmail.com">📧 Contactez-nous par email</a>
+          <a href="mailto:dolcecartolina.visuals@gmail.com?subject=Demande%20de%20renseignement%20pour%20le%20Kap%20TPE&body=${corpsMail}">📧 Contactez-nous par email</a>
           <a href="tel:+262692200461">📞 Appelez-nous</a>
         </div>`;
         result.style.color = "#00e676";
