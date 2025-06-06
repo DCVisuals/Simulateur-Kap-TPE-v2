@@ -178,7 +178,19 @@
         const reste = montant - aide;
         const libelle = getLibelleAPE(ape);
 
-        const corpsMail = encodeURIComponent(`Bonjour,%0A%0AMon code ape est le ${ape} (${libelle}), avec un Chiffre d'Affaire de ${ca}, ${salaries} salarié(s), un montant de projet de ${montant} € et je suis basé dans les ${zone === "oui" ? "Hauts" : "Bas"} de l'île de la Réunion.%0A%0AMerci de m'indiquer les étapes à suivre.%0A%0ACordialement,`);
+        const corpsTexte = `Bonjour,
+
+Mon code ape est le ${ape} (${libelle}), 
+Mon Chiffre d'Affaire est de ${ca}, 
+J'ai ${salaries} salarié(s), 
+Le Montant du projet que je souhaite faire financer est de ${montant} €,
+Je suis basé dans les ${zone === "oui" ? "Hauts" : "Bas"} de l'île de la Réunion.
+
+Merci de m'indiquer les étapes à suivre.
+
+Cordialement,`;
+
+const corpsMail = encodeURIComponent(corpsTexte);
 
         result.innerHTML = `<strong>Félicitations 🎉</strong><br>
           Votre projet semble éligible à l'aide Kap TPE.<br>
