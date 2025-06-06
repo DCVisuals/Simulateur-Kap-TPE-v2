@@ -83,10 +83,11 @@
   <div class="container">
     <h1>Simulateur d'éligibilité Kap TPE</h1>
     <p>La liste des codes APE éligibles est consultable sur le site officiel :
-    <a href="https://data.artisanat.fr/nafa/" target="_blank" style="color: #FFD700; text-decoration: underline;">https://data.artisanat.fr/nafa/</a></p>
+    <a href="https://data.artisanat.fr/nafa/" target="_blank" style="color: #FFD700; text-decoration: underline;">https://data.artisanat.fr/nafa/</a><br>
+    <em>Format attendu : par exemple "7420ZA"</em></p>
 
     <label for="ape">Code APE :</label>
-    <input type="text" id="ape" placeholder="7420ZS" />
+    <input type="text" id="ape" placeholder="7420ZA" />
 
     <label for="ca">Chiffre d'affaires (en €) :</label>
     <input type="number" id="ca" placeholder="ex : 850000" />
@@ -114,11 +115,19 @@
     fetch("codes-ape.json")
       .then(response => response.json())
       .then(data => {
-        codesAPEEligibles = data.codes.map(code => code.toUpperCase());
+        codesAPEEligibles = data.codes.map(entry => ({
+          code: entry.code.toUpperCase(),
+          label: entry.label
+        }));
       })
       .catch(err => {
         console.error("Erreur de chargement du fichier JSON :", err);
       });
+
+    function getLibelleAPE(code) {
+      const entry = codesAPEEligibles.find(e => e.code === code);
+      return entry ? entry.label : "";
+    }
 
     function verifierEligibilite() {
       const ape = document.getElementById("ape").value.toUpperCase().trim();
@@ -128,21 +137,20 @@
       const zone = document.getElementById("zone").value;
       const result = document.getElementById("result");
 
-      let message = "";
-      let errors = [];
-
       if (!ape || isNaN(ca) || isNaN(salaries) || isNaN(montant)) {
         result.innerHTML = "<strong>Erreur :</strong> Veuillez remplir tous les champs avant de vérifier l'éligibilité.";
         result.style.color = "#ff6b6b";
         return;
       }
 
-      if (!codesAPEEligibles.includes(ape)) {
+      let errors = [];
+      const codeAPEInfo = codesAPEEligibles.find(e => e.code === ape);
+
+      if (!codeAPEInfo) {
         errors.push("Votre code APE n'est pas référencé comme éligible.");
       }
 
       const plafond = ["4789ZP", "4776ZP"].includes(ape) ? 400000 : 1000000;
-
       if (ca > plafond) {
         errors.push(`Votre chiffre d'affaires dépasse le plafond de ${plafond.toLocaleString()} € pour votre code APE.`);
       }
@@ -154,28 +162,27 @@
       }
 
       if (errors.length > 0) {
-        message = "<strong>Résultat :</strong><br><ul><li>" + errors.join("</li><li>") + "</li></ul>";
+        result.innerHTML = "<strong>Résultat :</strong><br><ul><li>" + errors.join("</li><li>") + "</li></ul>";
         result.style.color = "#FFD700";
       } else {
         const taux = zone === "oui" ? 0.6 : 0.5;
         const aide = Math.round(montant * taux);
         const reste = montant - aide;
+        const libelle = getLibelleAPE(ape);
 
-        const corpsMail = encodeURIComponent(`Bonjour,%0A%0AMon code ape est le ${ape}, avec un Chiffre d'Affaire de ${ca}, ${salaries} salarié(s), un montant de projet de ${montant} € et je suis basé dans les ${zone === "oui" ? "Hauts" : "Bas"} de l'île de la Réunion.%0A%0AMerci de m'indiquer les étapes à suivre.%0A%0ACordialement,`);
+        const corpsMail = encodeURIComponent(`Bonjour,%0A%0AMon code ape est le ${ape} (${libelle}), avec un Chiffre d'Affaire de ${ca}, ${salaries} salarié(s), un montant de projet de ${montant} € et je suis basé dans les ${zone === "oui" ? "Hauts" : "Bas"} de l'île de la Réunion.%0A%0AMerci de m'indiquer les étapes à suivre.%0A%0ACordialement,`);
 
-        message = `<strong>Félicitations 🎉</strong><br>
-        Votre projet semble éligible à l'aide Kap TPE.<br>
-        Taux de subvention : ${taux * 100}%<br>
-        Montant estimé de l'aide : ${aide.toLocaleString()} €<br>
-        Reste à charge estimé : ${reste.toLocaleString()} €.<br>
-        <div class="contact-buttons">
-          <a href="mailto:dolcecartolina.visuals@gmail.com?subject=Demande%20de%20renseignement%20pour%20le%20Kap%20TPE&body=${corpsMail}">📧 Contactez-nous par email</a>
-          <a href="tel:+262692200461">📞 Appelez-nous</a>
-        </div>`;
+        result.innerHTML = `<strong>Félicitations 🎉</strong><br>
+          Votre projet semble éligible à l'aide Kap TPE.<br>
+          Taux de subvention : ${taux * 100}%<br>
+          Montant estimé de l'aide : ${aide.toLocaleString()} €<br>
+          Reste à charge estimé : ${reste.toLocaleString()} €.<br>
+          <div class="contact-buttons">
+            <a href="mailto:dolcecartolina.visuals@gmail.com?subject=Demande%20de%20renseignement%20pour%20le%20Kap%20TPE&body=${corpsMail}">📧 Contactez-nous par email</a>
+            <a href="tel:+262692200461">📞 Appelez-nous</a>
+          </div>`;
         result.style.color = "#00e676";
       }
-
-      result.innerHTML = message;
     }
   </script>
 </body>
