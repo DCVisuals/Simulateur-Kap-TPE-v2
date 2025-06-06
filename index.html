@@ -50,6 +50,22 @@
       border-radius: 6px;
       cursor: pointer;
     }
+    .contact-buttons {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .contact-buttons a {
+      display: inline-block;
+      padding: 0.75rem;
+      background-color: #00e676;
+      color: #000;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 6px;
+      text-decoration: none;
+    }
     #result {
       margin-top: 2rem;
       padding: 1rem;
@@ -66,8 +82,7 @@
 <body>
   <div class="container">
     <h1>Simulateur d'éligibilité Kap TPE</h1>
-    <p>Veuillez remplir les champs ci-dessous selon les critères de l'aide. Exemple de code APE : <strong>7420ZS</strong><br>
-    La liste des codes APE éligibles est consultable sur le site officiel :
+    <p>La liste des codes APE éligibles est consultable sur le site officiel :
     <a href="https://data.artisanat.fr/nafa/" target="_blank" style="color: #FFD700; text-decoration: underline;">https://data.artisanat.fr/nafa/</a></p>
 
     <label for="ape">Code APE :</label>
@@ -125,8 +140,11 @@
       if (!codesAPEEligibles.includes(ape)) {
         errors.push("Votre code APE n'est pas référencé comme éligible.");
       }
-      if (ca > 1000000) {
-        errors.push("Votre chiffre d'affaires dépasse le plafond de 1 000 000 €.");
+
+      const plafond = ["4789ZP", "4776ZP"].includes(ape) ? 400000 : 1000000;
+
+      if (ca > plafond) {
+        errors.push(`Votre chiffre d'affaires dépasse le plafond de ${plafond.toLocaleString()} € pour votre code APE.`);
       }
       if (salaries > 10) {
         errors.push("L'entreprise ne doit pas dépasser 10 salariés.");
@@ -148,7 +166,10 @@
         Taux de subvention : ${taux * 100}%<br>
         Montant estimé de l'aide : ${aide.toLocaleString()} €<br>
         Reste à charge estimé : ${reste.toLocaleString()} €.<br>
-        N'hésitez pas à nous contacter pour monter le dossier.`;
+        <div class="contact-buttons">
+          <a href="mailto:dolcecartolina.visuals@gmail.com">📧 Contactez-nous par email</a>
+          <a href="tel:+262692200461">📞 Appelez-nous</a>
+        </div>`;
         result.style.color = "#00e676";
       }
 
