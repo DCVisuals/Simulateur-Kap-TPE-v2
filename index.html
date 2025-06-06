@@ -3,30 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulateur Kap TPE</title>
-  <meta name="description" content="Vérifiez votre éligibilité à l'aide Kap TPE pour les artisans et commerçants à La Réunion : code APE, chiffre d'affaires, effectif, localisation et montant du projet.">
+  <title>Simulateur d'éligibilité Kap TPE</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #001f3f, #2e3b4e);
+      font-family: Arial, sans-serif;
+      background-color: #001f3f;
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0;
       padding: 2rem;
     }
     h1 {
       color: #FFD700;
-      margin-bottom: 1rem;
+      font-size: 2rem;
     }
-    form {
-      background: #2f2f2f;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(255,255,255,0.1);
-      max-width: 400px;
-      width: 100%;
+    p {
+      font-size: 1rem;
+      color: #ccc;
     }
     label {
       display: block;
@@ -34,79 +26,105 @@
     }
     input, select {
       width: 100%;
-      padding: 0.6rem;
-      border-radius: 6px;
+      padding: 0.5rem;
+      border-radius: 4px;
       border: none;
-      margin-bottom: 1rem;
+      font-size: 1rem;
     }
     button {
-      background: #FFD700;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #FFD700;
       color: #000;
-      padding: 0.8rem;
-      width: 100%;
-      font-weight: bold;
       border: none;
+      font-weight: bold;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.3s ease;
     }
-    button:hover {
-      background: #FFC300;
-    }
-    #resultat {
-      margin-top: 1.5rem;
-      font-size: 1.1rem;
-      text-align: center;
+    #result {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #2f2f2f;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>Simulateur d’éligibilité Kap TPE</h1>
-  <form id="kapForm">
-    <label for="ape">Code APE :</label>
-    <input type="text" id="ape" required>
+  <h1>Simulateur d'éligibilité Kap TPE</h1>
+  <p>Veuillez remplir les champs ci-dessous selon les critères de l'aide. Exemple de code APE : <strong>7420ZA</strong></p>
 
-    <label for="ca">CA annuel (€ HT) :</label>
-    <input type="number" id="ca" required>
+  <label for="ape">Code APE :</label>
+  <input type="text" id="ape" placeholder="7420ZA" />
 
-    <label for="salaries">Nombre de salariés :</label>
-    <input type="number" id="salaries" required>
+  <label for="ca">Chiffre d'affaires (en €) :</label>
+  <input type="number" id="ca" placeholder="ex : 850000" />
 
-    <label for="montant">Montant projet (€ HT) :</label>
-    <input type="number" id="montant" required>
+  <label for="salaries">Nombre de salariés :</label>
+  <input type="number" id="salaries" placeholder="ex : 3" />
 
-    <label for="hauts">Votre entreprise est-elle située dans les Hauts ?</label>
-    <select id="hauts">
-      <option value="non">Non</option>
-      <option value="oui">Oui</option>
-    </select>
+  <label for="montant">Montant du projet (HT en €) :</label>
+  <input type="number" id="montant" placeholder="ex : 12000" />
 
-    <button type="submit">Vérifier</button>
-  </form>
-  <div id="resultat"></div>
+  <label for="zone">Êtes-vous situé dans les Hauts ?</label>
+  <select id="zone">
+    <option value="non">Non</option>
+    <option value="oui">Oui</option>
+  </select>
+
+  <button onclick="verifierEligibilite()">Vérifier l'éligibilité</button>
+
+  <div id="result"></div>
 
   <script>
-    const codesEligibles = ["4332A", "5610A", "9602B", "4932Z", "4334Z"];
+    let codesAPEEligibles = [];
 
-    document.getElementById("kapForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const ape = document.getElementById("ape").value.trim().toUpperCase();
-      const ca = parseFloat(document.getElementById("ca").value);
+    // Charger la base JSON hébergée
+    fetch("codes-ape.json")
+      .then(response => response.json())
+      .then(data => {
+        codesAPEEligibles = data.codes.map(code => code.toUpperCase());
+      })
+      .catch(err => {
+        console.error("Erreur de chargement du fichier JSON :", err);
+      });
+
+    function verifierEligibilite() {
+      const ape = document.getElementById("ape").value.toUpperCase();
+      const ca = parseInt(document.getElementById("ca").value);
       const salaries = parseInt(document.getElementById("salaries").value);
-      const montant = parseFloat(document.getElementById("montant").value);
-      const hauts = document.getElementById("hauts").value;
+      const montant = parseInt(document.getElementById("montant").value);
+      const zone = document.getElementById("zone").value;
+      const result = document.getElementById("result");
 
-      const eligible = 
-        codesEligibles.includes(ape) &&
-        ca <= 1000000 &&
-        salaries < 10 &&
-        montant >= 5001 && montant <= 19999 &&
-        hauts === "non";
+      let message = "";
+      let errors = [];
 
-      document.getElementById("resultat").innerHTML = eligible
-        ? "<p style='color: #00e676;'>✅ Vous êtes potentiellement éligible au Kap TPE.</p>"
-        : "<p style='color: red;'>❌ Vous ne remplissez pas tous les critères d’éligibilité.</p>";
-    });
+      if (!codesAPEEligibles.includes(ape)) {
+        errors.push("Votre code APE n'est pas référencé comme éligible.");
+      }
+      if (ca > 1000000) {
+        errors.push("Votre chiffre d'affaires dépasse le plafond de 1 000 000 €.");
+      }
+      if (salaries > 10) {
+        errors.push("L'entreprise ne doit pas dépasser 10 salariés.");
+      }
+      if (montant < 5001 || montant > 19999) {
+        errors.push("Le montant du projet doit être compris entre 5 001 € et 19 999 € HT.");
+      }
+      if (zone === "oui") {
+        errors.push("La localisation dans les Hauts n'est pas éligible.");
+      }
+
+      if (errors.length > 0) {
+        message = "<strong>Résultat :</strong><br><ul><li>" + errors.join("</li><li>") + "</li></ul>";
+        result.style.color = "#FFD700";
+      } else {
+        message = "<strong>Félicitations 🎉</strong><br>Votre projet semble éligible à l'aide Kap TPE. N'hésitez pas à nous contacter pour monter le dossier.";
+        result.style.color = "#00e676";
+      }
+
+      result.innerHTML = message;
+    }
   </script>
 </body>
 </html>
